@@ -1,4 +1,5 @@
 @charset "UTF-8";
+
 body {
   background: #fff;
   font-family: "Montserrat", sans-serif; }
@@ -16,11 +17,13 @@ h1 {
   width: 1.875em; }
 
 .button {
+  width: 200px;
   background: #fff;
   border-radius: 4px;
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
   display: inline-block;
   padding: 1.25em 3em;
+  margin: 0 0.5em;
   text-decoration: none;
   -webkit-transition: 0.25s ease;
   transition: 0.25s ease; }
@@ -65,7 +68,7 @@ h1 {
       line-height: 0;
       z-index: -1; }
   .screen-win-tie {
-    background: #54D17A; }   
+    background: #54D17A; }
   .screen-win-one {
     background: #FFA000; }
     .screen-win-one .button {
@@ -92,9 +95,13 @@ h1 {
   position: absolute;
   top: 1rem;
   width: 35%;
-  padding: 1.25em 0 1em;
+  padding: 1.5em 0 1em;
   outline: 1px solid #ccc;
   transition: 1s; }
+  .players svg {
+    width: 2rem;
+    height: 2rem;
+  }
   .players svg g {
     fill: rgba(0, 0, 0, 0.25); }
   .players:first-child {
@@ -104,12 +111,52 @@ h1 {
   .players-turn {
     outline: none;
   }
+  .players span {
+    display: inline-block;
+    font-size: 1.5em;
+    font-weight: lighter;
+    position: relative;
+    top: -0.3em;
+    margin-right: 1rem;
+  }
+  .players.active span {
+    color: #fff;
+  }
   #player1.active svg g, #player2.active svg g {
     fill: #fff; }
   #player1.active {
     background: #FFA000; }
   #player2.active {
     background: #3688C3; }
+
+.player-names {
+  margin: 2rem 0 1rem;
+}
+
+.intro-message {
+  margin: 6em auto 2em;
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+input {
+  width: 196px;
+  outline: 0;
+  background: rgba(255, 255, 255, 0.75);
+  border: 2px solid #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+  display: block;
+  margin: 1rem auto;
+  padding: 1.1em 3em;
+  text-decoration: none;
+  -webkit-transition: 0.25s ease;
+  transition: 0.25s ease;
+  color: #43a762;
+}
+input:focus {
+  border: 2px solid #43a762;
+}
 
 .boxes {
   width: 480px;
@@ -125,7 +172,7 @@ h1 {
     padding: 1.75em;
     cursor: pointer;
     box-sizing: border-box;
-    transition: 0.2s ease; 
+    transition: 0.2s ease;
     background-size: 100px 100px;
     background-repeat: no-repeat;
     background-position: center center;}
@@ -137,5 +184,3 @@ h1 {
     .boxes .box-filled-2 {
       background-color: #3688C3;
       background-image: url(../img/x.svg); }
-
-

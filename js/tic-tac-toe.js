@@ -27,6 +27,8 @@ var TttGame = (function(){
      *
      */
     init : function () {
+      this.p1 = this.players[0].name;
+      this.p2 = this.players[1].name;
       this.cp = 1;
       this.board = [0,0,0,0,0,0,0,0,0];
     },
@@ -145,7 +147,14 @@ var TttGame = (function(){
 var htmlStart = '<div class="screen screen-start" id="start">' +
                 '<header>' +
                 '<h1>Tic Tac Toe</h1>' +
-                '<a href="#" class="button">Start game</a>' +
+                '<div class="player-names">' +
+          			'	<input type="text" placeholder="Player One" id="p1-name">' +
+          			'	<input type="text" placeholder="Player Two" id="p2-name">' +
+          			'</div>' +
+          			'<p class="intro-message">Please pick an opponent</p>' +
+          			'<a href="#" class="button btn-opp-human">Human</a>' +
+          			'<a href="#" class="button btn-opp-computer">Computer</a>' +
+          			'<a href="#" class="button btn-start">Start game</a>' +
                 '</header>' +
                 '</div>';
 
@@ -164,10 +173,62 @@ var htmlBoard = $('#board');
 
 
 /**
+ * Remove any content from the page and display
+ * the start a new game screen
+ */
+function gameInit() {
+  $('body div').remove();
+  $('body').append(htmlStart);
+  $('.player-names').hide();
+  $('.btn-start').hide();
+  // If chosing human oponent, ask for their names
+  $('.btn-opp-human').click(function() {
+    $('.button').hide();
+    $('#start p').hide();
+    $('.btn-start').show();
+    $('.player-names').show().children().first().focus();
+  });
+
+  // Start the game when clicking the start button
+  $('.btn-start').click(function() {
+    ttt.players[0].name = $('.player-names input').eq(0).val() !== "" ? $('.player-names input').eq(0).val() : "Player One";
+    ttt.players[1].name = $('.player-names input').eq(1).val() !== "" ? $('.player-names input').eq(1).val() : "Player Two";
+    gameStart();
+  });
+}
+
+
+/**
  * Ends the current game
  */
 function gameEnd(status) {
-  console.log(status);
+  $('body div').remove();
+  $('body').append(htmlWin);
+
+  var screen = '';
+  var message = '';
+
+  switch (status) {
+    case 1:
+      screen = 'screen-win-one';
+      message = ttt.p1 + ' Won!';
+      break;
+    case 2:
+      screen = 'screen-win-two';
+      message = ttt.p2 + ' Won!';
+      break;
+    case 3:
+      screen = 'screen-win-tie';
+      message = 'It\'s a Tie!';
+      break;
+  }
+
+  // Display the corrent winning screen and add button behaviour
+  $('.message').text(message);
+  $('.screen').addClass(screen);
+  $('.button').click(function() {
+    gameStart();
+  });
 }
 
 
@@ -236,21 +297,17 @@ function gameStart() {
   ttt.init();
   $('body div').remove();
   $('body').append(htmlBoard);
+  $('.players span').remove();
+  $('#player1').prepend('<span>' + ttt.p1 + '</span>');
+  $('#player2').prepend('<span>' + ttt.p2 + '</span>');
+  $('.box').attr('class', 'box');
+  $('.box').css('background-image', 'none');
   // Activate the first player
   activatePlayer(1);
 }
 
 
-/**
- * Remove any content from the page and display
- * the start a new game screen
- */
-function gameInit() {
-  $('body div').remove();
-  $('body').append(htmlStart);
-  // On click, start the game
-  $('.button').click(gameStart);
-}
+
 
 
 gameInit();

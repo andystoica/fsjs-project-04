@@ -1,3 +1,8 @@
+///////////////////////////////////////////////////////////
+////////////////////// Player Object //////////////////////
+///////////////////////////////////////////////////////////
+
+
 var TttPlayer = (function() {
   function TttPlayer(initialName, initialScore, isAI) {
     this.name = initialName || "None"; // The players name
@@ -13,6 +18,9 @@ var TttPlayer = (function() {
 })();
 
 
+/////////////////////////////////////////////////////////
+////////////////////// Game Object //////////////////////
+/////////////////////////////////////////////////////////
 
 var TttGame = (function(){
   function TttGame() {
@@ -104,7 +112,7 @@ var TttGame = (function(){
       if ((aMove >=0 && aMove <=8) && (this.board[aMove] === 0)) {
 
         // Make the move and check the game board for winners
-        ttt.board[aMove] = ttt.cp;
+        this.board[aMove] = this.cp;
         var status = this.checkBoard();
 
         // No winners found
@@ -130,6 +138,21 @@ var TttGame = (function(){
       } else {
         return 9; // Illeagal move
       }
+    },
+
+    /**
+     * Cycles through all available moves and picks a random one
+     */
+    pickAiMove : function() {
+      // Build a list of all available moves (val = 0)
+      var availMoves = [];
+      for (var i = 0; i < this.board.length; i++) {
+        if (this.board[i] === 0) {
+          availMoves.push(i);
+        }
+      }
+      // Return a random value
+      return availMoves[Math.floor(Math.random() * availMoves.length)];
     }
 
   };
@@ -138,10 +161,9 @@ var TttGame = (function(){
 })();
 
 
-
-////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////
-
+//////////////////////////////////////////////////////////////
+////////////////////// Main Application //////////////////////
+//////////////////////////////////////////////////////////////
 
 
 var htmlStart = '<div class="screen screen-start" id="start">' +
@@ -167,34 +189,26 @@ var htmlWin   = '<div class="screen screen-win" id="finish">' +
                 '</div>';
 
 
-
 var ttt = new TttGame();
 var htmlBoard = $('#board');
 
 
 /**
- * Remove any content from the page and display
- * the start a new game screen
- */
-function gameInit() {
+* Starts a new game by removing any previous graphics.
+* Initiliases the game and loads the board screen
+*/
+function gameStart() {
+  // Initialise the game
+  ttt.init();
   $('body div').remove();
-  $('body').append(htmlStart);
-  $('.player-names').hide();
-  $('.btn-start').hide();
-  // If chosing human oponent, ask for their names
-  $('.btn-opp-human').click(function() {
-    $('.button').hide();
-    $('#start p').hide();
-    $('.btn-start').show();
-    $('.player-names').show().children().first().focus();
-  });
-
-  // Start the game when clicking the start button
-  $('.btn-start').click(function() {
-    ttt.players[0].name = $('.player-names input').eq(0).val() !== "" ? $('.player-names input').eq(0).val() : "Player One";
-    ttt.players[1].name = $('.player-names input').eq(1).val() !== "" ? $('.player-names input').eq(1).val() : "Player Two";
-    gameStart();
-  });
+  $('body').append(htmlBoard);
+  $('.players span').remove();
+  $('#player1').prepend('<span>' + ttt.p1 + '</span>');
+  $('#player2').prepend('<span>' + ttt.p2 + '</span>');
+  $('.box').attr('class', 'box');
+  $('.box').css('background-image', 'none');
+  // Activate the first player
+  activatePlayer(1);
 }
 
 
@@ -232,7 +246,6 @@ function gameEnd(status) {
 }
 
 
-
 /**
  * Selects the current player
  */
@@ -257,57 +270,115 @@ function activatePlayer(p) {
   $('.boxes li').unbind('mouseenter mouseleave');
   $('.boxes li').unbind('click');
 
-  // Bind hover effect for the current user
-  $('.boxes li:not(.box-filled-1, .box-filled-2)').hover(function() {
-    $(this).css('background-image', 'url(' + $playerImage + ')');
-  }, function() {
-    $(this).css('background-image', 'none');
-  });
 
-  // Make a move when the current player clicks an available cell
-  $('.boxes li:not(.box-filled-1, .box-filled-2)').click(function() {
+  // Multiplayer behaviour
+  if (ttt.players[p-1].name !== "Computer"){
 
-    // Make the move, update the UI and check for winners
-    var gameStatus = ttt.playMove($(this).index());
-    $(this).addClass($playerClass);
-    $(this).unbind('mouseenter mouseleave');
+    // Bind hover effect for the current user if not computer
+    $('.boxes li:not(.box-filled-1, .box-filled-2, .box-filled-ai)').hover(function() {
+      $(this).css('background-image', 'url(' + $playerImage + ')');
+    }, function() {
+      $(this).css('background-image', '');
+    });
 
-    // If the game has finished (status 1, 2 or 3), end the game
-    if (gameStatus > 0 && gameStatus !== 9) {
-      gameEnd(gameStatus);
-    // Or activate the other player
-    } else {
-      if (p === 1) {
-        activatePlayer(2);
+    // Make a move when the current player clicks an available cell
+    $('.boxes li:not(.box-filled-1, .box-filled-2, .box-filled-ai)').click(function() {
+
+      // Make the move, update the UI and check for winners
+      var gameStatus = ttt.playMove($(this).index());
+      $(this).addClass($playerClass);
+      $(this).unbind('mouseenter mouseleave');
+
+      // If the game has finished (status 1, 2 or 3), end the game
+      if (gameStatus > 0 && gameStatus !== 9) {
+        gameEnd(gameStatus);
+        // Or activate the other player in multi player mode or
+        // Make the computer move
       } else {
-        activatePlayer(1);
+        if (p === 1) {
+          activatePlayer(2);
+        } else {
+          activatePlayer(1);
+        }
       }
-    }
+    });
 
-  });
+  // Single player behaviour, always for player 2
+  } else {
+    var AiMove = ttt.pickAiMove();
+    // Slow delay to simulate intense computation behind the scene
+    // ... consider suggesting a more powerful computer and moan about limited resources
+    setTimeout(function() {
+      $('.box').eq(AiMove).addClass('box-filled-ai').css('background-image', 'url(' + $playerImage + ')');
+      // Make the move and handle possible win situations
+      var gameStatus = ttt.playMove(AiMove);
+      // If the game has finished (status 1, 2 or 3), end the game
+      if (gameStatus > 0) {
+        gameEnd(gameStatus);
+      // Or give control back to the player
+      } else {
+        // Wait for animations to complete before giving control back to human player
+        setTimeout(function() {
+          activatePlayer(1);
+        }, 500);
+      }
+    }, 500);
+  }
 
 }
+
 
 /**
-* Starts a new game by removing any previous graphics.
-* Initiliases the game and loads the board screen
-*/
-function gameStart() {
-  // Initialise the game
-  ttt.init();
+ * Game initialisation
+ * Removes any content from the page and displays
+ * the start a new game screen allowing the user to select
+ * the option of playing against another user or the computer.
+ */
+function gameInit() {
+  // Remove all screens, load the start screen and hide all
+  // unnecessary elements from view
   $('body div').remove();
-  $('body').append(htmlBoard);
-  $('.players span').remove();
-  $('#player1').prepend('<span>' + ttt.p1 + '</span>');
-  $('#player2').prepend('<span>' + ttt.p2 + '</span>');
-  $('.box').attr('class', 'box');
-  $('.box').css('background-image', 'none');
-  // Activate the first player
-  activatePlayer(1);
+  $('body').append(htmlStart);
+  $('.player-names').hide();
+  $('.btn-start').hide();
+
+  // If the user chosses a human oponent, ask for both their names
+  $('.btn-opp-human').click(function() {
+    $('.button').hide();
+    $('#start p').hide();
+    $('.btn-start').show();
+    $('.player-names').show().children().first().focus();
+    // Start game if pressing Enter in the 2nd field
+    $('#p2-name').keyup(function(e) {
+      if (e.which === 13) {
+        $('.btn-start').trigger('click');
+      }
+    });
+  });
+
+  // If the user chosses a computer oponent, ask for a single name
+  $('.btn-opp-computer').click(function() {
+    $('.button').hide();
+    $('#start p').hide();
+    $('.btn-start').show();
+    $('.player-names').show().children().first().focus();
+    $('#p2-name').hide().val('Computer');
+    // Start game if pressing Enter in the name field
+    $('#p1-name').keyup(function(e) {
+      if (e.which === 13) {
+        $('.btn-start').trigger('click');
+      }
+    });
+  });
+
+  // Start the game when clicking the start button
+  $('.btn-start').click(function() {
+    // Grab the players names before starting the game
+    ttt.players[0].name = $('.player-names input').eq(0).val() !== "" ? $('.player-names input').eq(0).val() : "Player One";
+    ttt.players[1].name = $('.player-names input').eq(1).val() !== "" ? $('.player-names input').eq(1).val() : "Player Two";
+    gameStart();
+  });
 }
-
-
-
 
 
 gameInit();

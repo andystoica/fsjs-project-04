@@ -184,3 +184,7 @@ input:focus {
     .boxes .box-filled-2 {
       background-color: #3688C3;
       background-image: url(../img/x.svg); }
+    .boxes .box-filled-ai {
+      transition: background-color .5s ease;
+      background-color: #3688C3;
+      background-image: url(../img/x.svg); }

@@ -7,7 +7,7 @@
                   '	<input type="text" placeholder="Player One" id="p1-name">' +
                   '	<input type="text" placeholder="Player Two" id="p2-name">' +
                   '</div>' +
-                  '<p class="intro-message">Please pick an opponent</p>' +
+                  '<p class="intro-message">Pick an opponent</p>' +
                   '<a href="#" class="button btn-opp-human">Human</a>' +
                   '<a href="#" class="button btn-opp-computer">Computer</a>' +
                   '<a href="#" class="button btn-start">Start game</a>' +
@@ -200,7 +200,6 @@ var htmlBoard   = '<div class="board" id="board">' +
         // Return a random value
         return availMoves[Math.floor(Math.random() * availMoves.length)];
       }
-
     };
 
     return TttGame;
